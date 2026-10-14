@@ -19,20 +19,22 @@ A static site (HTML / CSS / JavaScript), no build dependencies, Hebrew (RTL) and
 Hosted on **Firebase Hosting**.
 
 ## 📁 Structure
-index.html Home
-about.html About the product
-sprints.html Sprints & documents
-gallery.html Gallery
-team.html Team
-css/style.css Styles
-js/ Navigation, effects, accessibility
-assets/ Images, documents (PDF), decks, logo
-firebase.json Hosting configuration
-
+```
+index.html        Home
+about.html        About the product
+sprints.html      Sprints & documents
+gallery.html      Gallery
+team.html         Team
+css/style.css     Styles
+js/               Navigation, effects, accessibility
+assets/           Images, documents (PDF), decks, logo
+firebase.json     Hosting configuration
+```
 
 ## 🚀 Deployment
 ```bash
 firebase deploy --only hosting --project watervision-vr
+```
 
 ## 👥 Team
 - **Sivan Lasri** — Scrum Master
