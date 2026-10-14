@@ -1,40 +1,42 @@
-# WaterVision VR — אתר פרויקט הגמר
+# WaterVision VR — Project Website
 
-אתר התדמית והתיעוד של **WaterVision VR** — פלטפורמת מציאות מדומה לישיבות מקצועיות בתחום המים: תמלול בזמן אמת, מודלים תלת-ממדיים ושיתוף פעולה ממרחק.
+The showcase and documentation site for **WaterVision VR** — a virtual-reality platform for professional meetings in the water sector: real-time transcription, 3D models, and remote collaboration.
 
-פרויקט גמר · מסלול הנדסת תוכנה · 2026
+Final project · Software Engineering · 2026
 
-## 🔗 האתר החי
+## 🔗 Live site
 **https://watervision-vr.web.app**
 
-## 📋 מה יש באתר
-- סקירת המוצר והפיצ'רים
-- תיעוד מלא של ארבעת הספרינטים (מסמכים, מצגות סיכום, סרטוני קבוצה ודמו, לוחות ClickUp)
-- גלריית צילומי מסך מה-VR ותמונות מאירועי הפרויקט
-- פוסטר הפרויקט וסרטון ההגשה הסופי
-- דף צוות
+## 📋 What's on the site
+- Product and feature overview
+- Full documentation of all four sprints (documents, summary decks, group & demo videos, ClickUp boards)
+- Gallery of VR screenshots and photos from project events
+- Project poster and the final submission video
+- Team page
 
-## 🛠️ טכנולוגיות
-אתר סטטי (HTML / CSS / JavaScript), ללא תלויות build, מותאם לעברית (RTL) ולנגישות.
-מתארח ב-**Firebase Hosting**.
+## 🛠️ Tech stack
+A static site (HTML / CSS / JavaScript), no build dependencies, Hebrew (RTL) and accessibility ready.
+Hosted on **Firebase Hosting**.
 
-## 📁 מבנה
-```
-index.html        דף הבית
-about.html        אודות המוצר
-sprints.html      ספרינטים ומסמכים
-gallery.html      גלריה
-team.html         הצוות
-css/style.css     עיצוב
-js/               ניווט, אפקטים ונגישות
-assets/           תמונות, מסמכים (PDF), מצגות, לוגו
-firebase.json     הגדרות אירוח
-```
+## 📁 Structure
+index.html Home
+about.html About the product
+sprints.html Sprints & documents
+gallery.html Gallery
+team.html Team
+css/style.css Styles
+js/ Navigation, effects, accessibility
+assets/ Images, documents (PDF), decks, logo
+firebase.json Hosting configuration
 
-## 🚀 פריסה
+
+## 🚀 Deployment
 ```bash
 firebase deploy --only hosting --project watervision-vr
-```
 
-## 👥 הצוות
-סיון לסרי · אלינור סרור · נתנאל שן · עומר פלג · שלו תורג'מן
+## 👥 Team
+- **Sivan Lasri** — Scrum Master
+- **Elinor Srur** — Product Owner
+- **Netanel Shen** — QA / Quality Assurance
+- **Omer Peleg** — Integration & Compatibility Lead
+- **Shalev Turgeman** — Infrastructure, Architecture & Design Lead
