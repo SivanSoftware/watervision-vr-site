@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WaterVision VR - הצוות</title>
+  <link rel="icon" href="assets/logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=9" />
+  <script>/*a11y-init*/try{var a=JSON.parse(localStorage.getItem("wv_a11y")||"{}"),c=document.documentElement;["contrast","grayscale","links","readable","no-motion","big-cursor"].forEach(function(k){if(a[k])c.classList.add("a11y-"+k)});if(a.font&&a.font!=100)c.style.fontSize=a.font+"%";}catch(e){}</script>
+  <style>
+    .team-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1.75rem;
+      margin-top: 3rem;
+    }
+
+    .member-card {
+      width: 250px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      text-align: center;
+      box-shadow: var(--shadow);
+      transition: transform 0.25s, box-shadow 0.25s;
+    }
+    .member-card:hover { transform: translateY(-6px); box-shadow: 0 12px 36px rgba(10,80,130,0.14); }
+
+    .member-photo-wrap {
+      position: relative;
+      height: 180px;
+      background: linear-gradient(135deg, var(--pale) 0%, #c8eefb 100%);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .member-photo-wrap img {
+      height: 160px;
+      width: 160px;
+      object-fit: cover;
+      border-radius: 50%;
+      border: 4px solid white;
+      box-shadow: 0 4px 16px rgba(10,80,130,0.15);
+      position: absolute;
+      bottom: -40px;
+    }
+
+    .member-info {
+      padding: 3rem 1.5rem 1.75rem;
+    }
+    .member-info h3 { font-size: 1rem; font-weight: 700; color: var(--navy); margin-bottom: 0.25rem; }
+    .member-role { font-size: 0.78rem; color: var(--teal); font-weight: 600; margin-bottom: 0.5rem; }
+    .member-desc { font-size: 0.8rem; color: var(--muted); line-height: 1.65; }
+
+    .team-logo-wrap {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+    .team-logo-wrap img { height: 90px; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">
+    <img src="assets/logo.png" alt="WaterVision" />
+    <span>WaterVision VR</span>
+  </div>
+  <div class="nav-links">
+    <a href="index.html">בית</a>
+    <a href="about.html">אודות</a>
+    <a href="sprints.html">ספרינטים</a>
+    <a href="gallery.html">גלריה</a>
+    <a href="team.html" class="active">הצוות</a>
+  </div>
+</nav>
+
+<div class="page-header">
+  <span class="ph-bubble" style="left:10%;width:10px;height:10px;--d:7s;--delay:0s"></span>
+  <span class="ph-bubble" style="left:24%;width:16px;height:16px;--d:9.5s;--delay:1.6s"></span>
+  <span class="ph-bubble" style="left:40%;width:7px;height:7px;--d:6s;--delay:3.2s"></span>
+  <span class="ph-bubble" style="left:55%;width:13px;height:13px;--d:8.5s;--delay:0.7s"></span>
+  <span class="ph-bubble" style="left:70%;width:9px;height:9px;--d:7.5s;--delay:2.4s"></span>
+  <span class="ph-bubble" style="left:84%;width:15px;height:15px;--d:10s;--delay:1.1s"></span>
+  <span class="ph-bubble" style="left:92%;width:6px;height:6px;--d:6.5s;--delay:3.8s"></span>
+  <h1>הצוות</h1>
+  <p>חמישה מפתחים, חזון אחד - לחבר את עולם המים לטכנולוגיית VR</p>
+</div>
+
+<div class="sec">
+  <div class="team-logo-wrap fade-in">
+    <img src="assets/teamlogo.png" alt="Team Logo" />
+  </div>
+
+  <div class="team-grid">
+
+    <div class="member-card fade-in">
+      <div class="member-photo-wrap">
+        <img src="assets/team/sivan.png" alt="סיון לסרי" />
+      </div>
+      <div class="member-info">
+        <h3>סיון לסרי</h3>
+        <div class="member-role">Scrum Master</div>
+        <p class="member-desc">מובילה את תהליך הסקראם, מנהלת את הספרינטים, מתאמת בין חברי הצוות ומסירה חסמים.</p>
+      </div>
+    </div>
+
+    <div class="member-card fade-in">
+      <div class="member-photo-wrap">
+        <img src="assets/team/elinor.png" alt="אלינור סרור" />
+      </div>
+      <div class="member-info">
+        <h3>אלינור סרור</h3>
+        <div class="member-role">Product Owner</div>
+        <p class="member-desc">אחראית על חזון המוצר, ניהול ה-Product Backlog ותעדוף הדרישות מול בעלי העניין.</p>
+      </div>
+    </div>
+
+    <div class="member-card fade-in">
+      <div class="member-photo-wrap">
+        <img src="assets/team/netanel.png" alt="נתנאל שן" />
+      </div>
+      <div class="member-info">
+        <h3>נתנאל שן</h3>
+        <div class="member-role">QA Lead</div>
+        <p class="member-desc">אחראי על אבטחת האיכות, תכנון וביצוע בדיקות והבטחת יציבות המערכת.</p>
+      </div>
+    </div>
+
+    <div class="member-card fade-in">
+      <div class="member-photo-wrap">
+        <img src="assets/team/omer.png" alt="עומר פלג" />
+      </div>
+      <div class="member-info">
+        <h3>עומר פלג</h3>
+        <div class="member-role">Integration &amp; Compatibility Lead</div>
+        <p class="member-desc">אחראי על אינטגרציה בין רכיבי המערכת ועל תאימות בין הפלטפורמות והמכשירים.</p>
+      </div>
+    </div>
+
+    <div class="member-card fade-in">
+      <div class="member-photo-wrap">
+        <img src="assets/team/shalev.png" alt="שלו תורג'מן" />
+      </div>
+      <div class="member-info">
+        <h3>שלו תורג'מן</h3>
+        <div class="member-role">Architecture &amp; Design Lead</div>
+        <p class="member-desc">אחראי על ארכיטקטורת המערכת, התשתית הטכנית והעיצוב של הפתרון.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <img src="assets/logo.png" alt="WaterVision" />
+  <div class="footer-name">WaterVision VR - פרויקט גמר 2026</div>
+  <div class="footer-team">סיון לסרי &middot; אלינור סרור &middot; נתנאל שן &middot; עומר פלג &middot; שלו תורג'מן</div>
+</footer>
+
+<script>
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('visible'); obs.unobserve(e.target); } });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+</script>
+<script src="js/nav.js" defer></script>
+<script src="js/effects.js" defer></script>
+<script src="js/a11y.js" defer></script>
+</body>
+</html>

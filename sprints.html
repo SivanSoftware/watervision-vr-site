@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WaterVision VR - ספרינטים</title>
+  <link rel="icon" href="assets/logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=9" />
+  <script>/*a11y-init*/try{var a=JSON.parse(localStorage.getItem("wv_a11y")||"{}"),c=document.documentElement;["contrast","grayscale","links","readable","no-motion","big-cursor"].forEach(function(k){if(a[k])c.classList.add("a11y-"+k)});if(a.font&&a.font!=100)c.style.fontSize=a.font+"%";}catch(e){}</script>
+  <style>
+    .sprint-block {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 2.5rem;
+      box-shadow: var(--shadow);
+    }
+
+    .sprint-header {
+      padding: 1.4rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .sprint-meta h2 { font-size: 1.05rem; font-weight: 700; color: var(--navy); margin-bottom: 0.12rem; }
+    .sprint-meta p { font-size: 0.78rem; color: var(--muted); }
+
+    .sprint-body {
+      padding: 2rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+    @media (max-width: 768px) { .sprint-body { grid-template-columns: 1fr; } }
+
+    .col-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 0.85rem;
+      font-weight: 600;
+    }
+
+    /* Video with fallback */
+    .video-wrap { position: relative; }
+    .video-embed { margin-bottom: 0.5rem; }
+    .video-fallback {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+    .video-fallback a {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      color: var(--teal); font-weight: 500;
+      border: 1px solid var(--border);
+      padding: 0.25rem 0.65rem;
+      border-radius: 5px;
+      background: var(--pale);
+      transition: background 0.2s;
+    }
+    .video-fallback a:hover { background: #c0e8f8; }
+
+    /* Multiple videos */
+    .video-group { display: flex; flex-direction: column; gap: 1.2rem; }
+    .video-item {}
+    .video-label { font-size: 0.76rem; color: var(--muted); margin-bottom: 0.4rem; }
+
+    /* Doc list with preview */
+    .doc-list-v2 { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+    .doc-list-v2 li {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--bg);
+    }
+    .doc-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.55rem 0.85rem;
+    }
+    .doc-info {
+      display: flex; align-items: center; gap: 0.55rem;
+      flex: 1; min-width: 0;
+    }
+    .doc-name { font-size: 0.83rem; color: var(--text); font-weight: 600; }
+    /* two-button unit (segmented control) */
+    .doc-actions {
+      display: flex; flex-shrink: 0;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      background: white;
+      box-shadow: 0 1px 3px rgba(10,60,100,0.05);
+    }
+    .doc-action-btn {
+      display: flex; align-items: center; justify-content: center; gap: 0.34rem;
+      padding: 0.44rem 0.9rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      font-family: inherit;
+      transition: background 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+    .doc-action-btn + .doc-action-btn { border-inline-start: 1px solid var(--border); }
+    .doc-action-btn.preview-btn { color: var(--teal); }
+    .doc-action-btn.preview-btn:hover { background: var(--pale); }
+    .doc-action-btn.download-btn { color: var(--navy); }
+    .doc-action-btn.download-btn:hover { background: #e8f4ff; }
+    @media (max-width: 560px) {
+      .doc-row { flex-direction: column; align-items: stretch; gap: 0.6rem; }
+      .doc-actions { width: 100%; }
+      .doc-action-btn { flex: 1; padding: 0.55rem; }
+    }
+
+    /* PDF Preview Modal */
+    .pdf-modal {
+      display: none; position: fixed; inset: 0; z-index: 8888;
+      background: rgba(5,20,40,0.92); align-items: center; justify-content: center;
+      padding: 1.5rem;
+    }
+    .pdf-modal.open { display: flex; }
+    .pdf-modal-inner {
+      background: white; border-radius: 12px; overflow: hidden;
+      width: 100%; max-width: 880px; height: 86vh;
+      display: flex; flex-direction: column;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+    .pdf-modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.85rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .pdf-modal-title { font-size: 0.9rem; font-weight: 600; color: var(--navy); }
+    .pdf-modal-actions { display: flex; gap: 0.5rem; }
+    .pdf-modal-close {
+      background: none; border: 1px solid var(--border); color: var(--muted);
+      width: 32px; height: 32px; border-radius: 6px; cursor: pointer;
+      font-size: 0.9rem; display: flex; align-items: center; justify-content: center;
+    }
+    .pdf-modal-close:hover { background: #fee; color: #c00; }
+    .pdf-download-btn {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      padding: 0.3rem 0.85rem; background: var(--teal); color: white;
+      border: none; border-radius: 6px; cursor: pointer; font-size: 0.78rem;
+      font-weight: 600; font-family: inherit; text-decoration: none;
+    }
+    .pdf-modal-body { flex: 1; }
+    .pdf-modal-body iframe { width: 100%; height: 100%; border: none; }
+
+    /* ClickUp link in sprint header */
+    .clickup-link {
+      margin-inline-start: auto;
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.5rem 1rem;
+      background: white; border: 1px solid var(--border); border-radius: 8px;
+      font-size: 0.78rem; font-weight: 600; color: var(--teal);
+      transition: all 0.2s; white-space: nowrap;
+    }
+    .clickup-link:hover { background: var(--pale); border-color: var(--teal); transform: translateY(-1px); }
+    .clickup-link svg { width: 15px; height: 15px; }
+    .clickup-soon { color: var(--muted); opacity: 0.65; cursor: default; }
+    .clickup-soon:hover { background: white; border-color: var(--border); transform: none; }
+
+    /* Sprint summary + epic tags */
+    .sprint-summary { padding: 1.5rem 2rem 0.25rem; }
+    .sprint-summary p { font-size: 0.86rem; color: var(--text); line-height: 1.8; margin-bottom: 1.1rem; }
+    .epics-label {
+      font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--muted); font-weight: 600; margin-bottom: 0.65rem;
+    }
+    .epic-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .epic-tag {
+      display: inline-flex; align-items: center; gap: 0.45rem;
+      background: var(--pale); border: 1px solid var(--border);
+      color: var(--navy); border-radius: 20px;
+      padding: 0.32rem 0.85rem; font-size: 0.76rem; font-weight: 600;
+    }
+    .epic-tag .en {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: var(--teal); color: white; font-size: 0.64rem; font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    /* ClickUp screenshots gallery */
+    .clickup-shots { padding: 0 2rem 1.85rem; }
+    .clickup-shots .col-label { display:flex; align-items:center; gap:0.45rem; margin-top:0.3rem; }
+    .clickup-shots .col-label svg { width:15px; height:15px; color:var(--teal); }
+    .shots-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(195px,1fr)); gap:0.85rem; }
+    .shot {
+      border:1px solid var(--border); border-radius:9px; overflow:hidden;
+      cursor:pointer; background:var(--bg); aspect-ratio:16/10; position:relative;
+      box-shadow:0 2px 10px rgba(10,60,100,0.06);
+    }
+    .shot img { width:100%; height:100%; object-fit:cover; object-position:top center; transition:transform 0.3s, opacity 0.2s; display:block; }
+    .shot:hover img { transform:scale(1.04); opacity:0.9; }
+    .shot::after {
+      content:''; position:absolute; inset:0;
+      background:rgba(17,151,196,0); transition:background 0.2s;
+    }
+    .shot:hover::after { background:rgba(17,151,196,0.08); }
+    @media(max-width:768px){
+      .sprint-header { flex-wrap: wrap; }
+      .clickup-link { margin-inline-start: 0; width: 100%; justify-content: center; padding: 0.45rem 0.7rem; }
+    }
+
+    /* SVG icon sizing */
+    .doc-icon { display:inline-flex; align-items:center; color:var(--teal); }
+    .doc-icon svg { width:18px; height:18px; }
+    .doc-action-btn svg { width:14px; height:14px; }
+    .pdf-download-btn svg { width:13px; height:13px; }
+    .video-fallback a svg { width:11px; height:11px; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">
+    <img src="assets/logo.png" alt="WaterVision" />
+    <span>WaterVision VR</span>
+  </div>
+  <div class="nav-links">
+    <a href="index.html">בית</a>
+    <a href="about.html">אודות</a>
+    <a href="sprints.html" class="active">ספרינטים</a>
+    <a href="gallery.html">גלריה</a>
+    <a href="team.html">הצוות</a>
+  </div>
+</nav>
+
+<div class="page-header">
+  <span class="ph-bubble" style="left:10%;width:10px;height:10px;--d:7s;--delay:0s"></span>
+  <span class="ph-bubble" style="left:24%;width:16px;height:16px;--d:9.5s;--delay:1.6s"></span>
+  <span class="ph-bubble" style="left:40%;width:7px;height:7px;--d:6s;--delay:3.2s"></span>
+  <span class="ph-bubble" style="left:55%;width:13px;height:13px;--d:8.5s;--delay:0.7s"></span>
+  <span class="ph-bubble" style="left:70%;width:9px;height:9px;--d:7.5s;--delay:2.4s"></span>
+  <span class="ph-bubble" style="left:84%;width:15px;height:15px;--d:10s;--delay:1.1s"></span>
+  <span class="ph-bubble" style="left:92%;width:6px;height:6px;--d:6.5s;--delay:3.8s"></span>
+  <h1>ספרינטים ומסמכים</h1>
+  <p>תיעוד כל שלבי הפיתוח - מהרעיון ועד לתוצר הסופי</p>
+</div>
+
+<div class="sec">
+
+  <!-- SPRINT 1 -->
+  <div class="sprint-block s1 fade-in">
+    <div class="sprint-header">
+      <div class="sprint-num">1</div>
+      <div class="sprint-meta">
+        <h2>ספרינט 1 - תשתית וליבת המערכת</h2>
+        <p>סביבת VR, ריבוי משתתפים, בסיס תמלול ותכנון המוצר</p>
+      </div>
+      <a class="clickup-link" href="https://sharing.clickup.com/90181983715/l/h/2kzm7qf3-558/ce410be24691764" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+        לוח ClickUp
+      </a>
+    </div>
+    <div class="sprint-summary">
+      <p>ספרינט הפתיחה הניח את כל התשתית של המערכת: סביבת VR בסיסית ב-Unity עם מיקרופון, אווטארים מסונכרנים ומעקב ראש וידיים, מערכת Lobby וחדרים, ותקשורת מרובת-משתתפים עם אודיו מרחבי. במקביל הוקמה תשתית התמלול (העלאת אודיו לענן וחיבור ל-API), נבנו בדיקות QA, יציבות ו-UX, והוגדר ה-MVP - כולל Backlog, מחקר מול מומחי תחום ותכנון חווית המשתמש.</p>
+      <div class="epics-label">6 אפיקים בספרינט</div>
+      <div class="epic-tags">
+        <span class="epic-tag"><span class="en">1</span> תשתית VR ליבה</span>
+        <span class="epic-tag"><span class="en">2</span> ריבוי משתתפים ורשת</span>
+        <span class="epic-tag"><span class="en">3</span> ניהול Agile ב-VR</span>
+        <span class="epic-tag"><span class="en">4</span> תמלול ודוחות ישיבה</span>
+        <span class="epic-tag"><span class="en">5</span> איכות ו-UX</span>
+        <span class="epic-tag"><span class="en">6</span> תכנון מוצר ו-MVP</span>
+      </div>
+    </div>
+    <div class="sprint-body">
+      <div>
+        <div class="col-label">סרטוני הגשה</div>
+        <div class="video-group">
+          <div class="video-item">
+            <div class="video-label">סרטון קבוצה</div>
+            <div class="video-embed">
+              <iframe src="https://drive.google.com/file/d/1VcjXha-n1gFXgXFRoH5_3dsicVw2U4nU/preview" allowfullscreen allow="autoplay"></iframe>
+            </div>
+            <div class="video-fallback">
+              לא נטען? <a href="https://drive.google.com/file/d/1VcjXha-n1gFXgXFRoH5_3dsicVw2U4nU/view" target="_blank"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 4l14 8-14 8z"/></svg> פתח ב-Google Drive</a>
+            </div>
+          </div>
+          <div class="video-item">
+            <div class="video-label">סרטון דמו</div>
+            <div class="video-embed">
+              <iframe src="https://drive.google.com/file/d/156gUuyPG6nEOEEMaoL0nvzyItZLRjZrw/preview" allowfullscreen allow="autoplay"></iframe>
+            </div>
+            <div class="video-fallback">
+              לא נטען? <a href="https://drive.google.com/file/d/156gUuyPG6nEOEEMaoL0nvzyItZLRjZrw/view" target="_blank"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 4l14 8-14 8z"/></svg> פתח ב-Google Drive</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="col-label">מסמכים</div>
+        <ul class="doc-list-v2">
+          <li><div class="doc-row"><div class="doc-info"><span class="doc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="1"/><path d="M12 16v4"/><path d="M8 20h8"/></svg></span><span class="doc-name">מצגת סיכום</span></div><div class="doc-actions"><button class="doc-action-btn preview-btn" onclick="openPdf('assets/docs/sprint1/presentation.pdf','מצגת ספרינט 1')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg> תצוגה</button><a class="doc-action-btn download-btn" href="assets/docs/sprint1/presentation.pdf" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg> הורדה</a></div></div></li>
+          <li><div class="doc-row"><div class="doc-info"><span class="doc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg></span><span class="doc-name">סיכום ספרינט</span></div><div class="doc-actions"><button class="doc-action-btn preview-btn" onclick="openPdf('assets/docs/sprint1/summary.pdf','סיכום ספרינט 1')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg> תצוגה</button><a class="doc-action-btn download-btn" href="assets/docs/sprint1/summary.pdf" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg> הורדה</a></div></div></li>
+          <li><div class="doc-row"><div class="doc-info"><span class="doc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="3" width="8" height="4" rx="1"/><path d="M8 5H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/></svg></span><span class="doc-name">PRD - דרישות מוצר</span></div><div class="doc-actions"><button class="doc-action-btn preview-btn" onclick="openPdf('assets/docs/sprint1/prd.pdf','PRD - ספרינט 1')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg> תצוגה</button><a class="doc-action-btn download-btn" href="assets/docs/sprint1/prd.pdf" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg> הורדה</a></div></div></li>
+          <li><div class="doc-row"><div class="doc-info"><span class="doc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 3 8l9 5 9-5z"/><path d="m3 13 9 5 9-5"/><path d="m3 18 9 5 9-5" opacity="0.5"/></svg></span><span class="doc-name">ארכיטקטורה</span></div><div class="doc-actions"><button class="doc-action-btn preview-btn" onclick="openPdf('assets/docs/sprint1/architecture.pdf','ארכיטקטורה - ספרינט 1')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg> תצוגה</button><a class="doc-action-btn download-btn" href="assets/docs/sprint1/architecture.pdf" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg> הורדה</a></div></div></li>
+          <li><div class="doc-row"><div class="doc-info"><span class="doc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m3 7 1.8 1.8L8 5.5"/><path d="m3 15 1.8 1.8L8 13.5"/><line x1="12" y1="7" x2="21" y2="7"/><line x1="12" y1="15" x2="21" y2="15"/></svg></span><span class="doc-name">Product Backlog</span></div><div class="doc-actions"><button class="doc-action-btn preview-btn" onclick="openPdf('assets/docs/sprint1/backlog.pdf','Backlog - ספרינט 1')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg> תצוגה</button><a class="doc-action-btn download-btn" href="assets/docs/sprint1/backlog.pdf" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg> הורדה</a></div></div></li>
+          <li><div class="doc-row"><div class="doc-info"><span class="doc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6l-4.5 8A2 2 0 0 0 7.3 20h9.4a2 2 0 0 0 1.8-3L14 9V3"/><line x1="8" y1="14" x2="16" y2="14"/></svg></span><span class="doc-name">QA ואבטחת איכות</span></div><div class="doc-actions"><button class="doc-action-btn preview-btn" onclick="openPdf('assets/docs/sprint1/qa.pdf','QA - ספרינט 1')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg> תצוגה</button><a class="doc-action-btn download-btn" href="assets/docs/sprint1/qa.pdf" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg> הורדה</a></div></div></li>
+        </ul>
+      </div>
+    </div>
+    <div class="clickup-shots" data-sprint="sprint1" data-count="4"></div>
+  </div>
+
+  <!-- SPRINT 2 -->
+  <div class="sprint-block s2 fade-in">
+    <div class="sprint-header">
+      <div class="sprint-num">2</div>
+      <div class="sprint-meta">
+        <h2>ספרינט 2 - תיעוד, שיתוף וניווט</h2>
+        <p>הקלטות, לוח שיתופי, סימולציית מים ותפריטים</p>
+      </div>
+      <a class="clickup-link" href="https://sharing.clickup.com/90181983715/l/h/6-901814306355-1/a438e5054566508" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+        לוח ClickUp
+      </a>
+    </div>
+    <div class="sprint-summary">
+      <p>ספרינט 2 הוסיף יכולות תיעוד ושיתוף: הקלטת ישיבות ושחזורן, צילומי מסך מתוך ה-VR, ולוח לבן שיתופי עם סנכרון כתיבה בזמן אמת. נוספו כלים אינטראקטיביים (סמן לייזר ומודל מסתובב), מערכת ניווט ותנועה עם אזורים מוגבלים ומעברים בין אזורים, והוצגה לראשונה סימולציית סינון מים מודרכת. כמו כן נבנו תפריט מהיר, מנגנון "התכנסות" אוטומטית של הצוות לישיבה, והושלם תיעוד ה-PDR והארכיטקטורה.</p>
+      <div class="epics-label">6 אפיקים בספרינט</div>
+      <div class="epic-tags">
+        <span class="epic-tag"><span class="en">1</span> תיעוד והקלטת ישיבות</span>
+        <span class="epic-tag"><span class="en">2</span> כלים שיתופיים אינטראקטיביים</span>
+        <span class="epic-tag"><span class="en">3</span> ניווט ותנועה</span>
+        <span class="epic-tag"><span class="en">4</span> תפריטים ו-UX</span>
+        <span class="epic-tag"><span class="en">5</span> נוכחות והתכנסות</span>
+        <span class="epic-tag"><span class="en">6</span> ניהול ותיעוד</span>
+      </div>
+    </div>
+    <div class="sprint-body">
+      <div>
+        <div class="col-label">סרטוני הגשה</div>
+        <div class="video-group">
+          <div class="video-item">
+            <div class="video-label">סרטון קבוצה</div>
+            <div class="video-embed">
+              <iframe src="https://drive.google.com/file/d/1x4jNSqsunqdfZEZ6eKN4rWQzB5x9kqqv/preview" allowfullscreen allow="autoplay"></iframe>
+            </div>
+            <div class="video-fallback">
+              לא נטען? <a href="https://drive.google.com/file/d/1x4jNSqsunqdfZEZ6eKN4rWQzB5x9kqqv/view" target="_blank"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 4l14 8-14 8z"/></svg> פתח ב-Google Drive</a>
+            </div>
+          </div>
+          <div class="video-item">
+            <div class="video-label">סרטון דמו</div>
+            <div class="video-embed">
+              <iframe src="https://drive.google.com/file/d/1xJdPmusOTWmLTiaz_ZrqBgRaFW-ELRiM/preview" allowfullscreen allow="autoplay"></iframe>
+            </div>
+            <div class="video-fallback">
+              לא נטען? <a href="https://drive.google.com/file/d/1xJdPmusOTWmLTiaz_ZrqBgRaFW-ELRiM/view" target="_blank"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 4l14 8-14 8z"/></svg> פתח ב-Google Drive</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="col-label">מסמכים</div>
+        <ul class="doc-list-v2">
+          <li><div class="doc-row"><div class="doc-info"><span class="doc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="1"/><path d="M12 16v4"/><path d="M8 20h8"/></svg></span><span class="doc-name">מצגת סיכום</span></div><div class="doc-actions"><button class="doc-action-btn preview-btn" onclick="openPdf('assets/docs/sprint2/presentation.pdf','מצגת ספרינט 2')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg> תצוגה</button><a class="doc-action-btn download-btn" href="assets/docs/sprint2/presentation.pdf" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg> הורדה</a></div></div></li>
+          <li><div class="doc-row"><div class="doc-info"><span class="doc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg></span><span class="doc-name">סיכום ספרינט</span></div><div class="doc-actions"><button class="doc-action-btn preview-btn" onclick="openPdf('assets/docs/sprint2/summary.pdf','סיכום ספרינט 2')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg> תצוגה</button><a class="doc-action-btn download-btn" href="assets/docs/sprint2/summary.pdf" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg> הורדה</a></div></div></li>
+          <li><div class="doc-row"><div class="doc-info"><span class="doc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="3" width="8" height="4" rx="1"/><path d="M8 5H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/></svg></span><span class="doc-name">PRD - דרישות מוצר</span></div><div class="doc-actions"><button class="doc-action-btn preview-btn" onclick="openPdf('assets/docs/sprint2/prd.pdf','PRD - ספרינט 2')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg> תצוגה</button><a class="doc-action-btn download-btn" href="assets/docs/sprint2/prd.pdf" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg> הורדה</a></div></div></li>
+          <li><div class="doc-row"><div class="doc-info"><span class="doc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 3 8l9 5 9-5z"/><path d="m3 13 9 5 9-5"/><path d="m3 18 9 5 9-5" opacity="0.5"/></svg></span><span class="doc-name">ארכיטקטורה</span></div><div class="doc-actions"><button class="doc-action-btn preview-btn" onclick="openPdf('assets/docs/sprint2/architecture.pdf','ארכיטקטורה - ספרינט 2')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg> תצוגה</button><a class="doc-action-btn download-btn" href="assets/docs/sprint2/architecture.pdf" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg> הורדה</a></div></div></li>
+          <li><div class="doc-row"><div class="doc-info"><span class="doc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m3 7 1.8 1.8L8 5.5"/><path d="m3 15 1.8 1.8L8 13.5"/><line x1="12" y1="7" x2="21" y2="7"/><line x1="12" y1="15" x2="21" y2="15"/></svg></span><span class="doc-name">Product Backlog</span></div><div class="doc-actions"><button class="doc-action-btn preview-btn" onclick="openPdf('assets/docs/sprint2/backlog.pdf','Backlog - ספרינט 2')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg> תצוגה</button><a class="doc-action-btn download-btn" href="assets/docs/sprint2/backlog.pdf" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg> הורדה</a></div></div></li>
+          <li><div class="doc-row"><div class="doc-info"><span class="doc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6l-4.5 8A2 2 0 0 0 7.3 20h9.4a2 2 0 0 0 1.8-3L14 9V3"/><line x1="8" y1="14" x2="16" y2="14"/></svg></span><span class="doc-name">QA ואבטחת איכות</span></div><div class="doc-actions"><button class="doc-action-btn preview-btn" onclick="openPdf('assets/docs/sprint2/qa.pdf','QA - ספרינט 2')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg> תצוגה</button><a class="doc-action-btn download-btn" href="assets/docs/sprint2/qa.pdf" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg> הורדה</a></div></div></li>
+          <li><div class="doc-row"><div class="doc-info"><span class="doc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg></span><span class="doc-name">Integration Testing</span></div><div class="doc-actions"><button class="doc-action-btn preview-btn" onclick="openPdf('assets/docs/sprint2/integration.pdf','Integration - ספרינט 2')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg> תצוגה</button><a class="doc-action-btn download-btn" href="assets/docs/sprint2/integration.pdf" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg> הורדה</a></div></div></li>
+        </ul>
+      </div>
+    </div>
+    <div class="clickup-shots" data-sprint="sprint2" data-count="5"></div>
+  </div>
+
+  <!-- SPRINT 3 -->
+  <div class="sprint-block s3 fade-in">
+    <div class="sprint-header">
+      <div class="sprint-num">3</div>
+      <div class="sprint-meta">
+        <h2>ספרינט 3 - פיצ'רים מתקדמים</h2>
+        <p>מציאות רבודה, סימולציית מט"ש, חדר מודלים ושפת סימנים</p>
+      </div>
+      <a class="clickup-link" href="https://sharing.clickup.com/90181983716/l/h/2kzm7qf4-218/53e22f7b8428f36" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+        לוח ClickUp
+      </a>
+    </div>
+    <div class="sprint-summary">
+      <p>הספרינט המתקדם ביותר: הוטמעה מציאות רבודה (AR) מלאה - מצב AR ומעבר מהיר, שכבות-על וסמנים, הנחת אובייקטים ושמירת עוגנים, ושיתוף תוכן AR בין משתתפים. נבנתה סימולציית מט"ש (טיהור שפכים) עם תרחיש מודרך, חיוויי כשל ואינטראקציה מוחשית; חדר מודלים מתקדם עם הרכבת מודלים מרובים וייצוא לפורמט תלת-ממד; ותשתית ג'סטות ידיים לשפת סימנים כולל כיול, הפחתת זיהויי שווא ומסך הדרכה. לצד אלה - שיפורי נוחות ו-UX רבים ותיעוד מלא.</p>
+      <div class="epics-label">6 אפיקים בספרינט</div>
+      <div class="epic-tags">
+        <span class="epic-tag"><span class="en">1</span> מציאות רבודה (AR)</span>
+        <span class="epic-tag"><span class="en">2</span> סימולציית מט"ש</span>
+        <span class="epic-tag"><span class="en">3</span> חדר מודלים והרכבה</span>
+        <span class="epic-tag"><span class="en">4</span> שפת סימנים וג'סטות</span>
+        <span class="epic-tag"><span class="en">5</span> נוחות ו-UX</span>
+        <span class="epic-tag"><span class="en">6</span> ניהול ותיעוד</span>
+      </div>
+    </div>
+    <div class="sprint-body">
+      <div>
+        <div class="col-label">סרטון הגשה</div>
+        <div class="video-wrap">
+          <div class="video-embed">
+            <iframe src="https://drive.google.com/file/d/17BAuoRpWBrefIvQpc1J8ZBE2JGWuXiCO/preview" allowfullscreen allow="autoplay"></iframe>
+          </div>
+          <div class="video-fallback">
+            לא נטען? <a href="https://drive.google.com/file/d/17BAuoRpWBrefIvQpc1J8ZBE2JGWuXiCO/view" target="_blank"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 4l14 8-14 8z"/></svg> פתח ב-Google Drive</a>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="col-label">מסמכים</div>
+        <ul class="doc-list-v2">
+          <li><div class="doc-row"><div class="doc-info"><span class="doc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="1"/><path d="M12 16v4"/><path d="M8 20h8"/></svg></span><span class="doc-name">מצגת סיכום</span></div><div class="doc-actions"><button class="doc-action-btn preview-btn" onclick="openPdf('assets/docs/sprint3/presentation.pdf','מצגת ספרינט 3')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg> תצוגה</button><a class="doc-action-btn download-btn" href="assets/docs/sprint3/presentation.pdf" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg> הורדה</a></div></div></li>
+          <li><div class="doc-row"><div class="doc-info"><span class="doc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg></span><span class="doc-name">סיכום ספרינט</span></div><div class="doc-actions"><button class="doc-action-btn preview-btn" onclick="openPdf('assets/docs/sprint3/summary.pdf','סיכום ספרינט 3')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg> תצוגה</button><a class="doc-action-btn download-btn" href="assets/docs/sprint3/summary.pdf" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg> הורדה</a></div></div></li>
+          <li><div class="doc-row"><div class="doc-info"><span class="doc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="3" width="8" height="4" rx="1"/><path d="M8 5H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/></svg></span><span class="doc-name">PRD - דרישות מוצר</span></div><div class="doc-actions"><button class="doc-action-btn preview-btn" onclick="openPdf('assets/docs/sprint3/prd.pdf','PRD - ספרינט 3')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg> תצוגה</button><a class="doc-action-btn download-btn" href="assets/docs/sprint3/prd.pdf" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg> הורדה</a></div></div></li>
+          <li><div class="doc-row"><div class="doc-info"><span class="doc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 3 8l9 5 9-5z"/><path d="m3 13 9 5 9-5"/><path d="m3 18 9 5 9-5" opacity="0.5"/></svg></span><span class="doc-name">ארכיטקטורה</span></div><div class="doc-actions"><button class="doc-action-btn preview-btn" onclick="openPdf('assets/docs/sprint3/architecture.pdf','ארכיטקטורה - ספרינט 3')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg> תצוגה</button><a class="doc-action-btn download-btn" href="assets/docs/sprint3/architecture.pdf" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg> הורדה</a></div></div></li>
+          <li><div class="doc-row"><div class="doc-info"><span class="doc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m3 7 1.8 1.8L8 5.5"/><path d="m3 15 1.8 1.8L8 13.5"/><line x1="12" y1="7" x2="21" y2="7"/><line x1="12" y1="15" x2="21" y2="15"/></svg></span><span class="doc-name">Product Backlog</span></div><div class="doc-actions"><button class="doc-action-btn preview-btn" onclick="openPdf('assets/docs/sprint3/backlog.pdf','Backlog - ספרינט 3')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg> תצוגה</button><a class="doc-action-btn download-btn" href="assets/docs/sprint3/backlog.pdf" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg> הורדה</a></div></div></li>
+          <li><div class="doc-row"><div class="doc-info"><span class="doc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6l-4.5 8A2 2 0 0 0 7.3 20h9.4a2 2 0 0 0 1.8-3L14 9V3"/><line x1="8" y1="14" x2="16" y2="14"/></svg></span><span class="doc-name">QA ואבטחת איכות</span></div><div class="doc-actions"><button class="doc-action-btn preview-btn" onclick="openPdf('assets/docs/sprint3/qa.pdf','QA - ספרינט 3')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg> תצוגה</button><a class="doc-action-btn download-btn" href="assets/docs/sprint3/qa.pdf" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg> הורדה</a></div></div></li>
+          <li><div class="doc-row"><div class="doc-info"><span class="doc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg></span><span class="doc-name">Integration Testing</span></div><div class="doc-actions"><button class="doc-action-btn preview-btn" onclick="openPdf('assets/docs/sprint3/integration.pdf','Integration - ספרינט 3')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg> תצוגה</button><a class="doc-action-btn download-btn" href="assets/docs/sprint3/integration.pdf" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg> הורדה</a></div></div></li>
+          <li><div class="doc-row"><div class="doc-info"><span class="doc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V9l5 3.5V9l5 3.5V9l5 3.5V21z"/><line x1="3" y1="21" x2="21" y2="21"/></svg></span><span class="doc-name">דוח ביקור בית שאן</span></div><div class="doc-actions"><button class="doc-action-btn preview-btn" onclick="openPdf('assets/docs/sprint3/beit_shean_report.pdf','דוח ביקור בית שאן')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg> תצוגה</button><a class="doc-action-btn download-btn" href="assets/docs/sprint3/beit_shean_report.pdf" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg> הורדה</a></div></div></li>
+        </ul>
+      </div>
+    </div>
+    <div class="clickup-shots" data-sprint="sprint3" data-count="12"></div>
+  </div>
+
+  <!-- SPRINT 4 -->
+  <div class="sprint-block s4 fade-in">
+    <div class="sprint-header">
+      <div class="sprint-num">4</div>
+      <div class="sprint-meta">
+        <h2>ספרינט 4 - הגשה סופית <span class="final-badge">סיום פרויקט</span></h2>
+        <p>פיצ'רים אחרונים, פולישינג, הצגה וסיכום</p>
+      </div>
+    </div>
+    <div class="sprint-body">
+      <div>
+        <div class="col-label">סרטון הגשה</div>
+        <div class="video-wrap">
+          <div class="video-embed">
+            <iframe src="https://drive.google.com/file/d/1_EYbdvHYdRXkJc6etKTqnHNrgDusS1hC/preview" allowfullscreen allow="autoplay"></iframe>
+          </div>
+          <div class="video-fallback">
+            לא נטען? <a href="https://drive.google.com/file/d/1_EYbdvHYdRXkJc6etKTqnHNrgDusS1hC/view" target="_blank"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 4l14 8-14 8z"/></svg> פתח ב-Google Drive</a>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="col-label">מסמכים</div>
+        <ul class="doc-list-v2">
+          <li><div class="doc-row"><div class="doc-info"><span class="doc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="1"/><path d="M12 16v4"/><path d="M8 20h8"/></svg></span><span class="doc-name">מצגת סיכום</span></div><div class="doc-actions"><button class="doc-action-btn preview-btn" onclick="openPdf('assets/docs/sprint4/presentation.pdf','מצגת ספרינט 4')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg> תצוגה</button><a class="doc-action-btn download-btn" href="assets/docs/sprint4/presentation.pdf" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg> הורדה</a></div></div></li>
+          <li><div class="doc-row"><div class="doc-info"><span class="doc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg></span><span class="doc-name">סיכום הפרויקט</span></div><div class="doc-actions"><button class="doc-action-btn preview-btn" onclick="openPdf('assets/docs/sprint4/summary.pdf','סיכום הפרויקט')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg> תצוגה</button><a class="doc-action-btn download-btn" href="assets/docs/sprint4/summary.pdf" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg> הורדה</a></div></div></li>
+          <li><div class="doc-row"><div class="doc-info"><span class="doc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg></span><span class="doc-name">רטרוספקטיבה</span></div><div class="doc-actions"><button class="doc-action-btn preview-btn" onclick="openPdf('assets/docs/sprint4/retrospective.pdf','רטרוספקטיבה')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg> תצוגה</button><a class="doc-action-btn download-btn" href="assets/docs/sprint4/retrospective.pdf" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg> הורדה</a></div></div></li>
+        </ul>
+        <p style="font-size:0.76rem;color:var(--muted);margin-top:1.5rem;padding:0.85rem;background:var(--pale);border-radius:8px;line-height:1.7;">
+          הספרינט הסופי כלל השלמת כל הפיצ'רים, בדיקות מקיפות, הכנת חומרי ההגשה וההצגה בפני שופטים ואנשי תעשייה.
+        </p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ClickUp screenshots lightbox -->
+<div class="lightbox" id="shotLb">
+  <button class="lightbox-close" onclick="closeShot()">✕</button>
+  <button class="lightbox-nav lightbox-prev" onclick="navShot(-1)">&#8249;</button>
+  <img id="shotImg" src="" alt="" />
+  <button class="lightbox-nav lightbox-next" onclick="navShot(1)">&#8250;</button>
+  <div class="lightbox-caption" id="shotCap"></div>
+</div>
+
+<footer>
+  <img src="assets/logo.png" alt="WaterVision" />
+  <div class="footer-name">WaterVision VR - פרויקט גמר 2026</div>
+  <div class="footer-team">סיון לסרי &middot; אלינור סרור &middot; נתנאל שן &middot; עומר פלג &middot; שלו תורג'מן</div>
+</footer>
+
+<script>
+  // PDFs open in a new browser tab - reliable across all browsers
+  function openPdf(src, title) { window.open(src, '_blank', 'noopener'); }
+
+  // ── ClickUp screenshots gallery + lightbox ──
+  const shotCounts = { sprint1: 4, sprint2: 5, sprint3: 12 };
+  const shotLabels = { sprint1: 'ספרינט 1', sprint2: 'ספרינט 2', sprint3: 'ספרינט 3' };
+
+  document.querySelectorAll('.clickup-shots').forEach(box => {
+    const sp = box.dataset.sprint;
+    const count = parseInt(box.dataset.count);
+    const label = document.createElement('div');
+    label.className = 'col-label';
+    label.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg> לוח ClickUp - צילומי מסך';
+    const grid = document.createElement('div');
+    grid.className = 'shots-grid';
+    for (let i = 0; i < count; i++) {
+      const d = document.createElement('div');
+      d.className = 'shot';
+      d.onclick = () => openShot(sp, i);
+      d.innerHTML = `<img src="assets/clickup/${sp}/${i+1}.png" alt="ClickUp ${shotLabels[sp]} - ${i+1}" loading="lazy">`;
+      grid.appendChild(d);
+    }
+    box.appendChild(label);
+    box.appendChild(grid);
+  });
+
+  let curSp = 'sprint1', curI = 0;
+  function openShot(sp, i) {
+    curSp = sp; curI = i; updateShot();
+    document.getElementById('shotLb').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeShot() {
+    document.getElementById('shotLb').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  function navShot(dir) {
+    const n = shotCounts[curSp];
+    curI = (curI + dir + n) % n;
+    updateShot();
+  }
+  function updateShot() {
+    document.getElementById('shotImg').src = `assets/clickup/${curSp}/${curI+1}.png`;
+    document.getElementById('shotCap').textContent = `לוח ClickUp - ${shotLabels[curSp]} (${curI+1}/${shotCounts[curSp]})`;
+  }
+  window.openShot = openShot; window.closeShot = closeShot; window.navShot = navShot;
+
+  document.getElementById('shotLb').addEventListener('click', function(e) {
+    if (e.target === this) closeShot();
+  });
+  document.addEventListener('keydown', e => {
+    if (!document.getElementById('shotLb').classList.contains('open')) return;
+    if (e.key === 'Escape') closeShot();
+    if (e.key === 'ArrowRight') navShot(1);
+    if (e.key === 'ArrowLeft') navShot(-1);
+  });
+
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('visible'); obs.unobserve(e.target); } });
+  }, { threshold: 0.05 });
+  document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+</script>
+<script src="js/nav.js" defer></script>
+<script src="js/effects.js" defer></script>
+<script src="js/a11y.js" defer></script>
+</body>
+</html>

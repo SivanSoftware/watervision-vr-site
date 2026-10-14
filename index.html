@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WaterVision VR - פרויקט גמר</title>
+  <link rel="icon" href="assets/logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=9" />
+  <script>/*a11y-init*/try{var a=JSON.parse(localStorage.getItem("wv_a11y")||"{}"),c=document.documentElement;["contrast","grayscale","links","readable","no-motion","big-cursor"].forEach(function(k){if(a[k])c.classList.add("a11y-"+k)});if(a.font&&a.font!=100)c.style.fontSize=a.font+"%";}catch(e){}</script>
+  <script>try{if(sessionStorage.getItem('wv_splash'))document.documentElement.className+=' splash-seen';}catch(e){}</script>
+  <style>
+/* ═══════════════════════════════
+   HOME PAGE EXCLUSIVE STYLES
+═══════════════════════════════ */
+
+/* ── HERO ─────────────────────── */
+#hero {
+  min-height: 100vh;
+  background: linear-gradient(160deg, #031829 0%, #062e52 25%, #084d80 55%, #0a7dac 80%, #0fb3d8 100%);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(80,200,255,0.12), transparent 45%),
+    radial-gradient(circle at 85% 75%, rgba(30,180,220,0.10), transparent 50%);
+  pointer-events: none;
+}
+
+.orb {
+  position: absolute; border-radius: 50%;
+  filter: blur(80px);
+  animation: orb-pulse var(--d,8s) ease-in-out infinite alternate;
+  pointer-events: none;
+}
+.orb-1 { width:500px;height:500px; background:rgba(14,150,200,0.18); top:-100px; left:-100px; --d:9s; }
+.orb-2 { width:400px;height:400px; background:rgba(30,200,240,0.12); bottom:0; right:-80px; --d:12s; }
+.orb-3 { width:300px;height:300px; background:rgba(80,220,255,0.1); top:40%; right:25%; --d:7s; }
+@keyframes orb-pulse { from{transform:scale(0.9) translateY(0)} to{transform:scale(1.1) translateY(-30px)} }
+
+.bubble {
+  position: absolute; border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%, rgba(255,255,255,0.30), rgba(120,220,255,0.05) 70%);
+  border: 1px solid rgba(130,225,255,0.35);
+  box-shadow: 0 0 10px rgba(120,220,255,0.15);
+  animation: bubble-rise var(--d,15s) ease-in infinite var(--delay,0s);
+  pointer-events: none;
+}
+@keyframes bubble-rise {
+  0%   { transform:translateY(0) scale(1); opacity:0; }
+  10%  { opacity:0.7; }
+  80%  { opacity:0.4; }
+  100% { transform:translateY(-110vh) scale(0.4); opacity:0; }
+}
+
+.wave-container { position:absolute; bottom:0; left:0; right:0; pointer-events:none; }
+.wave-container svg { display:block; }
+
+.hero-content {
+  position: relative; z-index: 2;
+  text-align: center;
+  padding: 6rem 2rem 12rem;
+  max-width: 900px;
+}
+
+/* ── FLIP COIN LOGO ─────────────── */
+.hero-coin {
+  width: 168px; height: 168px;
+  margin: 0 auto 3rem;
+  perspective: 1000px;
+  cursor: pointer;
+  animation: coin-float 5s ease-in-out infinite;
+}
+@keyframes coin-float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+.coin-inner {
+  position: relative; width: 100%; height: 100%;
+  transform-style: preserve-3d;
+  animation: coin-flip 7s ease-in-out infinite;
+}
+.hero-coin:hover .coin-inner { animation-play-state: paused; }
+@keyframes coin-flip {
+  0%, 38%   { transform: rotateY(0deg); }
+  50%, 88%  { transform: rotateY(180deg); }
+  100%      { transform: rotateY(360deg); }
+}
+.coin-face {
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border: 3px solid rgba(255,255,255,0.85);
+  box-shadow: 0 0 30px rgba(80,200,255,0.5), inset 0 0 12px rgba(0,0,0,0.15);
+  background: #eaf6fc;
+}
+.coin-face img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.coin-back { transform: rotateY(180deg); }
+
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(80,200,255,0.25);
+  border-radius: 20px; padding: 0.3rem 1rem;
+  font-size: 0.75rem; color: rgba(180,240,255,0.9);
+  letter-spacing: 0.08em; text-transform: uppercase;
+  margin-bottom: 1.5rem; backdrop-filter: blur(6px);
+}
+.eyebrow-dot {
+  width:6px; height:6px; border-radius:50%;
+  background:#4ce8ff; box-shadow:0 0 8px #4ce8ff;
+  animation: dot-blink 2s ease-in-out infinite;
+}
+@keyframes dot-blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.hero-title {
+  font-size: clamp(3.5rem, 8vw, 6.5rem);
+  font-weight: 900; line-height: 1.0;
+  margin-bottom: 0.6rem; letter-spacing: -0.03em;
+}
+.hero-title .w1 { color: white; display: block; }
+.hero-title .w2 {
+  display: block;
+  background: linear-gradient(100deg, #5cf0ff, #90d8ff, #d0f5ff);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+
+.hero-desc {
+  font-size: clamp(1rem, 2.2vw, 1.18rem);
+  color: rgba(200,235,255,0.75);
+  max-width: 560px; margin: 1.2rem auto 2.5rem;
+  line-height: 1.85; font-weight: 300;
+}
+
+.hero-cta { display:flex; gap:0.9rem; justify-content:center; flex-wrap:wrap; margin-bottom:3.5rem; }
+.cta-primary {
+  background: linear-gradient(135deg, #18c8e8, #0d9ec0);
+  color: white; padding: 0.9rem 2.2rem; border-radius: 10px;
+  font-size: 0.92rem; font-weight: 700;
+  box-shadow: 0 4px 24px rgba(20,180,220,0.45);
+  transition: transform 0.2s, box-shadow 0.2s;
+  text-decoration: none; display: inline-flex; align-items: center; gap: 0.55rem;
+}
+.cta-primary:hover { transform:translateY(-3px); box-shadow:0 8px 32px rgba(20,180,220,0.6); color:white; }
+.cta-ghost {
+  background: rgba(255,255,255,0.07); color: rgba(210,245,255,0.95);
+  border: 1.5px solid rgba(100,200,240,0.3); padding: 0.9rem 2.2rem;
+  border-radius: 10px; font-size: 0.92rem; font-weight: 600;
+  backdrop-filter: blur(8px); transition: all 0.2s;
+  text-decoration: none; display: inline-flex; align-items: center; gap: 0.55rem;
+}
+.cta-ghost:hover { background:rgba(255,255,255,0.14); color:white; }
+.cta-primary svg, .cta-ghost svg { width:18px; height:18px; }
+
+.tech-row { display:flex; gap:0.5rem; justify-content:center; flex-wrap:wrap; }
+.tech-badge {
+  background:rgba(255,255,255,0.07); border:1px solid rgba(120,210,255,0.2);
+  color:rgba(180,235,255,0.85); padding:0.32rem 0.9rem;
+  border-radius:20px; font-size:0.76rem; backdrop-filter:blur(4px); letter-spacing:0.03em;
+  display:inline-flex; align-items:center; gap:0.4rem;
+}
+.tech-badge svg { width:15px; height:15px; }
+
+.scroll-arrow {
+  position:absolute; bottom:105px; left:50%; transform:translateX(-50%); z-index:2;
+  display:flex; flex-direction:column; align-items:center; gap:0.3rem;
+  color:rgba(150,220,255,0.45); font-size:0.7rem; letter-spacing:0.06em;
+}
+.scroll-arrow svg { animation:arr-bounce 2.5s ease-in-out infinite; }
+@keyframes arr-bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(6px)} }
+
+/* ── MARQUEE ─────────────────── */
+.marquee-section { background:var(--pale); padding:1.3rem 0; overflow:hidden; border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+.marquee-track { display:flex; width:max-content; animation:marquee-go 40s linear infinite; }
+.marquee-track:hover { animation-play-state:paused; }
+.marquee-group { display:flex; align-items:center; gap:1rem; padding-left:1rem; }
+.marquee-item {
+  display:flex; align-items:center; gap:0.45rem;
+  font-size:0.78rem; font-weight:600; color:var(--muted);
+  white-space:nowrap; padding:0.3rem 0.95rem;
+  background:white; border:1px solid var(--border); border-radius:20px;
+}
+.marquee-item svg { width:15px; height:15px; color:var(--teal); flex-shrink:0; }
+@keyframes marquee-go { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+/* ── FEATURES ────────────────── */
+.features-bg { background:white; padding:6rem 2rem; }
+.features-inner { max-width:1100px; margin:0 auto; }
+
+.feature-grid {
+  display:grid; grid-template-columns:repeat(3,1fr);
+  gap:1.25rem; margin-top:3rem;
+}
+@media(max-width:900px){ .feature-grid{grid-template-columns:1fr 1fr;} }
+@media(max-width:600px){ .feature-grid{grid-template-columns:1fr;} }
+
+.feat-card {
+  border-radius:14px; padding:1.9rem 1.75rem;
+  border:1px solid var(--border); position:relative; overflow:hidden;
+  background:var(--bg); transition:transform 0.3s, box-shadow 0.3s;
+}
+.feat-card:hover { transform:translateY(-6px); box-shadow:0 16px 40px rgba(10,80,130,0.13); }
+.feat-num { font-size:2.8rem; font-weight:900; color:rgba(10,80,130,0.06); position:absolute; top:0.3rem; left:0.8rem; line-height:1; user-select:none; }
+.feat-icon {
+  width:54px; height:54px; border-radius:14px;
+  display:flex; align-items:center; justify-content:center;
+  margin-bottom:1.1rem; position:relative; z-index:1;
+}
+.feat-icon svg { width:27px; height:27px; }
+.feat-card:nth-child(1) .feat-icon { background:#e3f3fb; color:#1197c4; }
+.feat-card:nth-child(2) .feat-icon { background:#e3f7ee; color:#1a9a5a; }
+.feat-card:nth-child(3) .feat-icon { background:#efe6fb; color:#8030c0; }
+.feat-card:nth-child(4) .feat-icon { background:#fdf0e0; color:#c07020; }
+.feat-card:nth-child(5) .feat-icon { background:#e0f6fa; color:#0c91a8; }
+.feat-card:nth-child(6) .feat-icon { background:#e6ecfb; color:#3050c0; }
+.feat-card h3 { font-size:0.95rem; font-weight:700; color:var(--navy); margin-bottom:0.45rem; }
+.feat-card p { font-size:0.82rem; color:var(--muted); line-height:1.7; }
+
+/* ── STATS ───────────────────── */
+.stats-section {
+  background:linear-gradient(135deg,#062e52 0%,#084d80 50%,#0980aa 100%);
+  padding:5rem 2rem; position:relative; overflow:hidden;
+}
+.stats-section::before {
+  content:''; position:absolute; inset:0;
+  background-image:
+    radial-gradient(circle at 20% 50%,rgba(80,200,255,0.08) 0,transparent 50%),
+    radial-gradient(circle at 80% 50%,rgba(80,200,255,0.06) 0,transparent 50%);
+}
+.stats-inner { max-width:960px; margin:0 auto; position:relative; }
+.stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:2.5rem; text-align:center; }
+.stat-box .num {
+  font-size:3.2rem; font-weight:900;
+  background:linear-gradient(135deg,#7ef0ff,white);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  display:block;
+}
+.stat-box .lbl { font-size:0.75rem; color:rgba(180,230,255,0.7); margin-top:0.35rem; letter-spacing:0.06em; text-transform:uppercase; }
+.stat-box .sub { font-size:0.67rem; color:rgba(140,200,240,0.5); margin-top:0.12rem; }
+
+/* ── VIDEO ───────────────────── */
+.video-section { padding:6rem 2rem; background:white; }
+.video-inner { max-width:860px; margin:0 auto; }
+
+/* ── TIMELINE ────────────────── */
+.timeline-section { padding:6rem 2rem; background:var(--bg); }
+.timeline-inner { max-width:780px; margin:0 auto; }
+.timeline { position:relative; padding-right:2rem; }
+.timeline::before {
+  content:''; position:absolute; top:0; right:12px; bottom:0; width:2px;
+  background:linear-gradient(to bottom,var(--teal),var(--cyan),var(--pale));
+}
+.timeline-item { position:relative; margin-bottom:2rem; padding-right:2.5rem; }
+.timeline-dot {
+  position:absolute; top:0.4rem; right:-14px;
+  width:28px; height:28px; border-radius:50%;
+  background:white; border:2px solid var(--teal);
+  display:flex; align-items:center; justify-content:center;
+  font-size:0.7rem; font-weight:700; color:var(--teal);
+  box-shadow:0 0 0 4px var(--pale); z-index:1;
+}
+.timeline-card {
+  background:white; border:1px solid var(--border); border-radius:12px;
+  padding:1.2rem 1.4rem; box-shadow:0 2px 12px rgba(10,60,100,0.06);
+  transition:transform 0.25s, box-shadow 0.25s;
+}
+.timeline-card:hover { transform:translateX(-4px); box-shadow:0 6px 24px rgba(10,80,130,0.1); }
+.timeline-card h3 { font-size:0.9rem; font-weight:700; color:var(--navy); margin-bottom:0.3rem; }
+.timeline-card p { font-size:0.79rem; color:var(--muted); line-height:1.65; }
+.timeline-tag {
+  display:inline-block; background:var(--pale); color:var(--teal);
+  border:1px solid var(--border); border-radius:4px; padding:0.1rem 0.5rem;
+  font-size:0.67rem; font-weight:600; margin-bottom:0.45rem;
+}
+
+/* ── POSTER ──────────────────── */
+.poster-section { padding: 6rem 2rem; background: white; }
+.poster-inner { max-width: 780px; margin: 0 auto; }
+.poster-frame { position: relative; }
+.poster-link {
+  display: block; border-radius: 14px; overflow: hidden;
+  border: 1px solid var(--border); box-shadow: var(--shadow);
+  position: relative;
+}
+.poster-link img { width: 100%; display: block; transition: transform 0.4s; }
+.poster-link:hover img { transform: scale(1.02); }
+.poster-zoom-hint {
+  position: absolute; top: 1rem; left: 1rem;
+  background: rgba(6,40,71,0.82); color: white;
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.4rem 0.85rem; border-radius: 8px;
+  font-size: 0.78rem; font-weight: 600;
+  backdrop-filter: blur(4px); opacity: 0; transition: opacity 0.25s;
+}
+.poster-link:hover .poster-zoom-hint { opacity: 1; }
+.poster-zoom-hint svg { width: 15px; height: 15px; }
+.poster-actions { display: flex; gap: 0.75rem; justify-content: center; margin-top: 1.75rem; flex-wrap: wrap; }
+.poster-actions .btn svg { width: 17px; height: 17px; }
+
+/* ── QUICK NAV ───────────────── */
+.quicknav-section { padding:5rem 2rem; background:white; }
+.quicknav-inner { max-width:1100px; margin:0 auto; }
+.quicknav-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:1.5rem; margin-top:2.5rem; }
+.qn-card {
+  border-radius:16px; overflow:hidden; border:1px solid var(--border);
+  text-decoration:none; display:block; background:white;
+  transition:transform 0.25s, box-shadow 0.25s;
+}
+.qn-card:hover { transform:translateY(-6px); box-shadow:0 16px 40px rgba(10,80,130,0.14); }
+.qn-banner { height:100px; display:flex; align-items:center; justify-content:center; color:white; }
+.qn-banner svg { width:42px; height:42px; opacity:0.95; }
+.qn-b1 { background:linear-gradient(135deg,#062e52,#1197c4); }
+.qn-b2 { background:linear-gradient(135deg,#1a4a20,#28b860); }
+.qn-b3 { background:linear-gradient(135deg,#3a1a6e,#9030d0); }
+.qn-body { padding:1.25rem 1.5rem 1.5rem; }
+.qn-body h3 { font-size:0.93rem; font-weight:700; color:var(--navy); margin-bottom:0.3rem; }
+.qn-body p { font-size:0.79rem; color:var(--muted); margin-bottom:0.7rem; }
+.qn-link { font-size:0.79rem; font-weight:600; color:var(--teal); }
+  </style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="splash-inner">
+    <img src="assets/logo.png" alt="WaterVision VR" class="splash-logo" />
+    <div class="splash-title">WaterVision VR</div>
+    <div class="splash-loader"><span></span></div>
+  </div>
+  <span class="splash-bubble" style="left:20%;width:12px;height:12px;--d:6s;--delay:0s"></span>
+  <span class="splash-bubble" style="left:45%;width:8px;height:8px;--d:7s;--delay:1.5s"></span>
+  <span class="splash-bubble" style="left:70%;width:14px;height:14px;--d:8s;--delay:0.8s"></span>
+  <span class="splash-bubble" style="left:85%;width:9px;height:9px;--d:6.5s;--delay:2.2s"></span>
+  <span class="splash-bubble" style="left:32%;width:10px;height:10px;--d:7.5s;--delay:3s"></span>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <img src="assets/logo.png" alt="WaterVision" />
+    <span>WaterVision VR</span>
+  </div>
+  <div class="nav-links">
+    <a href="index.html" class="active">בית</a>
+    <a href="about.html">אודות</a>
+    <a href="sprints.html">ספרינטים</a>
+    <a href="gallery.html">גלריה</a>
+    <a href="team.html">הצוות</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <div class="bubble" style="width:12px;height:12px;bottom:0%;right:9%;--d:14s;--delay:0s"></div>
+  <div class="bubble" style="width:8px;height:8px;bottom:0%;right:18%;--d:11s;--delay:2s"></div>
+  <div class="bubble" style="width:18px;height:18px;bottom:0%;right:27%;--d:16s;--delay:1s"></div>
+  <div class="bubble" style="width:6px;height:6px;bottom:0%;right:34%;--d:9s;--delay:3s"></div>
+  <div class="bubble" style="width:14px;height:14px;bottom:0%;right:42%;--d:13s;--delay:0.5s"></div>
+  <div class="bubble" style="width:10px;height:10px;bottom:0%;right:49%;--d:12s;--delay:4s"></div>
+  <div class="bubble" style="width:7px;height:7px;bottom:0%;right:56%;--d:10s;--delay:5s"></div>
+  <div class="bubble" style="width:16px;height:16px;bottom:0%;right:63%;--d:15s;--delay:1.5s"></div>
+  <div class="bubble" style="width:9px;height:9px;bottom:0%;right:71%;--d:11.5s;--delay:2.6s"></div>
+  <div class="bubble" style="width:13px;height:13px;bottom:0%;right:78%;--d:14.5s;--delay:0.9s"></div>
+  <div class="bubble" style="width:6px;height:6px;bottom:0%;right:85%;--d:9.5s;--delay:3.7s"></div>
+  <div class="bubble" style="width:15px;height:15px;bottom:0%;right:92%;--d:16.5s;--delay:1.9s"></div>
+  <div class="bubble" style="width:8px;height:8px;bottom:0%;right:4%;--d:10.5s;--delay:4.5s"></div>
+  <div class="bubble" style="width:11px;height:11px;bottom:0%;right:38%;--d:13.5s;--delay:6s"></div>
+  <div class="bubble" style="width:7px;height:7px;bottom:0%;right:66%;--d:12.5s;--delay:5.5s"></div>
+  <div class="bubble" style="width:20px;height:20px;bottom:0%;right:14%;--d:18s;--delay:2.2s"></div>
+
+  <div class="hero-content">
+    <div class="hero-coin" title="לחצו כדי לעצור את הסיבוב">
+      <div class="coin-inner">
+        <div class="coin-face coin-front"><img src="assets/logo.png" alt="WaterVision VR" /></div>
+        <div class="coin-face coin-back"><img src="assets/teamlogo.png" alt="הצוות" /></div>
+      </div>
+    </div>
+
+    <div class="hero-eyebrow">
+      <span class="eyebrow-dot"></span>
+      פרויקט גמר &middot; מסלול תוכנה &middot; 2026
+    </div>
+
+    <h1 class="hero-title">
+      <span class="w1">Water</span>
+      <span class="w2">Vision VR</span>
+    </h1>
+
+    <p class="hero-desc">
+      פלטפורמת מציאות מדומה לישיבות מקצועיות בתחום המים -<br/>
+      תמלול בזמן אמת, מודלים תלת-ממדיים ושיתוף פעולה ממרחק.
+    </p>
+
+    <div class="hero-cta">
+      <a href="sprints.html" class="cta-primary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="3" width="8" height="4" rx="1"/><path d="M8 5H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/></svg>
+        לספרינטים ומסמכים
+      </a>
+      <a href="gallery.html" class="cta-ghost">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+        גלריה
+      </a>
+    </div>
+
+    <div class="tech-row">
+      <span class="tech-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-3.6a1 1 0 0 1-.8-.4l-1-1.3a1 1 0 0 0-1.6 0l-1 1.3a1 1 0 0 1-.8.4H5a2 2 0 0 1-2-2z"/></svg>
+        Unity VR
+      </span>
+      <span class="tech-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12a3 3 0 0 1 3 3v2a3 3 0 0 1-5.5 1.7l-.5-.7a1.5 1.5 0 0 0-1.2-.7h-3.6a1.5 1.5 0 0 0-1.2.7l-.5.7A3 3 0 0 1 3 13v-2a3 3 0 0 1 3-3z"/><line x1="8" y1="11" x2="8" y2="11.01"/><line x1="6.5" y1="12.5" x2="9.5" y2="12.5"/><line x1="16" y1="11" x2="16" y2="11.01"/></svg>
+        Meta Quest
+      </span>
+      <span class="tech-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="17" x2="12" y2="21"/><line x1="8" y1="21" x2="16" y2="21"/></svg>
+        Speech-to-Text
+      </span>
+      <span class="tech-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M16 5.5a3 3 0 0 1 0 5.5M21 20a6 6 0 0 0-4-5.6"/></svg>
+        Multiplayer
+      </span>
+      <span class="tech-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="M3 7l9 5 9-5"/><path d="M12 12v10"/></svg>
+        3D Models
+      </span>
+      <span class="tech-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="20" x2="5" y2="12"/><line x1="10" y1="20" x2="10" y2="6"/><line x1="15" y1="20" x2="15" y2="14"/><line x1="20" y1="20" x2="20" y2="9"/></svg>
+        People Analytics
+      </span>
+    </div>
+  </div>
+
+  <div class="scroll-arrow">
+    גלול
+    <svg width="20" height="14" viewBox="0 0 20 14" fill="none">
+      <path d="M2 2L10 11L18 2" stroke="rgba(120,210,255,0.6)" stroke-width="2.5" stroke-linecap="round"/>
+    </svg>
+  </div>
+
+  <div class="wave-container">
+    <svg viewBox="0 0 1440 100" preserveAspectRatio="none" style="height:100px" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,60 C200,100 400,20 600,60 C800,100 1000,30 1200,55 C1320,70 1390,65 1440,62 L1440,100 L0,100Z" fill="white" opacity="0.3"/>
+      <path d="M0,75 C300,110 500,40 720,75 C900,102 1100,45 1300,70 C1380,80 1420,77 1440,75 L1440,100 L0,100Z" fill="white" opacity="0.5"/>
+      <path d="M0,88 C250,105 450,70 700,88 C950,106 1150,72 1440,88 L1440,100 L0,100Z" fill="white"/>
+    </svg>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-section">
+  <div class="marquee-track" id="marqueeTrack">
+    <div class="marquee-group">
+      <span class="marquee-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-3.6a1 1 0 0 1-.8-.4l-1-1.3a1 1 0 0 0-1.6 0l-1 1.3a1 1 0 0 1-.8.4H5a2 2 0 0 1-2-2z"/></svg>Unity VR</span>
+      <span class="marquee-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h1a3 3 0 0 1 0 6h-1M6 10H5a3 3 0 0 0 0 6h1M9 13h6M12 3a4 4 0 0 1 4 4v9a4 4 0 0 1-8 0V7a4 4 0 0 1 4-4z"/></svg>XR Interaction Toolkit</span>
+      <span class="marquee-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12a3 3 0 0 1 3 3v2a3 3 0 0 1-5.5 1.7l-.5-.7a1.5 1.5 0 0 0-1.2-.7h-3.6a1.5 1.5 0 0 0-1.2.7l-.5.7A3 3 0 0 1 3 13v-2a3 3 0 0 1 3-3z"/></svg>Meta Quest 3</span>
+      <span class="marquee-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>Netcode for GameObjects</span>
+      <span class="marquee-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="20" x2="5" y2="12"/><line x1="10" y1="20" x2="10" y2="6"/><line x1="15" y1="20" x2="15" y2="14"/><line x1="20" y1="20" x2="20" y2="9"/></svg>People Analytics</span>
+      <span class="marquee-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="M3 7l9 5 9-5"/><path d="M12 12v10"/></svg>GLB / FBX Models</span>
+      <span class="marquee-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11V6a1.5 1.5 0 0 1 3 0v4M10 9.5V4.5a1.5 1.5 0 0 1 3 0V10M13 10V5.5a1.5 1.5 0 0 1 3 0V11M16 11V8a1.5 1.5 0 0 1 3 0v6a6 6 0 0 1-6 6h-1a6 6 0 0 1-5.3-3.2L4 13.5a1.5 1.5 0 0 1 2.6-1.5L7.5 13"/></svg>Hand Tracking</span>
+      <span class="marquee-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>Real-time Transcription</span>
+      <span class="marquee-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg>Augmented Reality (AR)</span>
+      <span class="marquee-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5C12 2.5 5 10 5 14.5a7 7 0 0 0 14 0C19 10 12 2.5 12 2.5z"/></svg>Water Infrastructure</span>
+    </div>
+    <div class="marquee-group" aria-hidden="true">
+      <span class="marquee-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-3.6a1 1 0 0 1-.8-.4l-1-1.3a1 1 0 0 0-1.6 0l-1 1.3a1 1 0 0 1-.8.4H5a2 2 0 0 1-2-2z"/></svg>Unity VR</span>
+      <span class="marquee-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h1a3 3 0 0 1 0 6h-1M6 10H5a3 3 0 0 0 0 6h1M9 13h6M12 3a4 4 0 0 1 4 4v9a4 4 0 0 1-8 0V7a4 4 0 0 1 4-4z"/></svg>XR Interaction Toolkit</span>
+      <span class="marquee-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12a3 3 0 0 1 3 3v2a3 3 0 0 1-5.5 1.7l-.5-.7a1.5 1.5 0 0 0-1.2-.7h-3.6a1.5 1.5 0 0 0-1.2.7l-.5.7A3 3 0 0 1 3 13v-2a3 3 0 0 1 3-3z"/></svg>Meta Quest 3</span>
+      <span class="marquee-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>Netcode for GameObjects</span>
+      <span class="marquee-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="20" x2="5" y2="12"/><line x1="10" y1="20" x2="10" y2="6"/><line x1="15" y1="20" x2="15" y2="14"/><line x1="20" y1="20" x2="20" y2="9"/></svg>People Analytics</span>
+      <span class="marquee-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="M3 7l9 5 9-5"/><path d="M12 12v10"/></svg>GLB / FBX Models</span>
+      <span class="marquee-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11V6a1.5 1.5 0 0 1 3 0v4M10 9.5V4.5a1.5 1.5 0 0 1 3 0V10M13 10V5.5a1.5 1.5 0 0 1 3 0V11M16 11V8a1.5 1.5 0 0 1 3 0v6a6 6 0 0 1-6 6h-1a6 6 0 0 1-5.3-3.2L4 13.5a1.5 1.5 0 0 1 2.6-1.5L7.5 13"/></svg>Hand Tracking</span>
+      <span class="marquee-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>Real-time Transcription</span>
+      <span class="marquee-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg>Augmented Reality (AR)</span>
+      <span class="marquee-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5C12 2.5 5 10 5 14.5a7 7 0 0 0 14 0C19 10 12 2.5 12 2.5z"/></svg>Water Infrastructure</span>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<div class="features-bg">
+  <div class="features-inner">
+    <div class="sec-title fade-in">
+      <h2>מה עושה WaterVision VR?</h2>
+      <div class="line"></div>
+      <p>פלטפורמה מקיפה לישיבות מקצועיות בסביבת VR, מותאמת לאנשי מקצוע בתחום המים</p>
+    </div>
+    <div class="feature-grid">
+      <div class="feat-card fade-in">
+        <span class="feat-num">01</span>
+        <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-4.4a1 1 0 0 1-.8-.4l-1.2-1.6a1 1 0 0 0-1.6 0l-1.2 1.6a1 1 0 0 1-.8.4H5a2 2 0 0 1-2-2z"/></svg></div>
+        <h3>חדר ישיבות VR מלא</h3>
+        <p>סביבה תלת-ממדית עם אווטארים מסונכרנים, תנועת ידיים ותקשורת קולית. כניסה תוך 3 שניות.</p>
+      </div>
+      <div class="feat-card fade-in">
+        <span class="feat-num">02</span>
+        <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="17" x2="12" y2="21"/><line x1="8" y1="21" x2="16" y2="21"/></svg></div>
+        <h3>תמלול בזמן אמת</h3>
+        <p>Speech-to-Text מבוסס Azure - כל מה שנאמר מתומלל לפי דובר, עם ייצוא PDF בסיום.</p>
+      </div>
+      <div class="feat-card fade-in">
+        <span class="feat-num">03</span>
+        <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="M3 7l9 5 9-5"/><path d="M12 12v10"/></svg></div>
+        <h3>חדר מודלים תלת-ממדי</h3>
+        <p>ייבוא והצגה של מודלים GLB/FBX ב-VR, בניית צינורות וסימולציית מט"ש בזמן אמת.</p>
+      </div>
+      <div class="feat-card fade-in">
+        <span class="feat-num">04</span>
+        <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="20" x2="5" y2="12"/><line x1="10" y1="20" x2="10" y2="6"/><line x1="15" y1="20" x2="15" y2="14"/><line x1="20" y1="20" x2="20" y2="9"/></svg></div>
+        <h3>People Analytics</h3>
+        <p>מעקב אחר מעורבות המשתתפים בזמן אמת - ניתוח זמן דיבור ורמת השתתפות.</p>
+      </div>
+      <div class="feat-card fade-in">
+        <span class="feat-num">05</span>
+        <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11V6a1.5 1.5 0 0 1 3 0v4M10 9.5V4.5a1.5 1.5 0 0 1 3 0V10M13 10V5.5a1.5 1.5 0 0 1 3 0V11M16 11V8a1.5 1.5 0 0 1 3 0v6a6 6 0 0 1-6 6h-1a6 6 0 0 1-5.3-3.2L4 13.5a1.5 1.5 0 0 1 2.6-1.5L7.5 13"/></svg></div>
+        <h3>שפת סימנים וג'סטות</h3>
+        <p>זיהוי ג'סטות ידיים לתקשורת חלופית, סנכרון ידיים מדויק ולוח לבן שיתופי.</p>
+      </div>
+      <div class="feat-card fade-in">
+        <span class="feat-num">06</span>
+        <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5C12 2.5 5 10 5 14.5a7 7 0 0 0 14 0C19 10 12 2.5 12 2.5z"/></svg></div>
+        <h3>ממוקד תחום המים</h3>
+        <p>נבדק במט"ש בית שאן עם אנשי מקצוע. סימולציות מציאותיות של תשתיות מים.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-section">
+  <div class="stats-inner">
+    <div class="stats-grid fade-in">
+      <div class="stat-box"><span class="num" data-target="4">0</span><div class="lbl">ספרינטים</div><div class="sub">4 חודשי פיתוח</div></div>
+      <div class="stat-box"><span class="num" data-target="5">0</span><div class="lbl">חברי צוות</div><div class="sub">5 מפתחים</div></div>
+      <div class="stat-box"><span class="num" data-target="1120">0</span><div class="lbl">שעות עבודה</div><div class="sub">בסה"כ</div></div>
+      <div class="stat-box"><span class="num" data-target="3">0</span><div class="lbl">שניות כניסה</div><div class="sub">לחדר ה-VR</div></div>
+      <div class="stat-box"><span class="num" data-target="4">0</span><div class="lbl">משתמשים</div><div class="sub">בו-זמנית</div></div>
+      <div class="stat-box"><span class="num" data-target="21">0</span><div class="lbl">פיצ'רים</div><div class="sub">מומשו</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- VIDEO -->
+<div class="video-section fade-in">
+  <div class="video-inner">
+    <div class="sec-title">
+      <h2>סרטון הגשה סופית</h2>
+      <div class="line"></div>
+      <p>סרטון קבוצה ודמו - ספרינט 4</p>
+    </div>
+    <div class="video-embed">
+      <iframe src="https://drive.google.com/file/d/1_EYbdvHYdRXkJc6etKTqnHNrgDusS1hC/preview" allowfullscreen allow="autoplay"></iframe>
+    </div>
+    <div style="text-align:center;margin-top:0.75rem;">
+      <a href="https://drive.google.com/file/d/1_EYbdvHYdRXkJc6etKTqnHNrgDusS1hC/view" target="_blank" style="font-size:0.8rem;color:var(--muted);">לא נטען? פתח ב-Google Drive &rarr;</a>
+    </div>
+  </div>
+</div>
+
+<!-- TIMELINE -->
+<div class="timeline-section">
+  <div class="timeline-inner">
+    <div class="sec-title fade-in">
+      <h2>מסע הפרויקט</h2>
+      <div class="line"></div>
+    </div>
+    <div class="timeline fade-in">
+      <div class="timeline-item">
+        <div class="timeline-dot">1</div>
+        <div class="timeline-card">
+          <span class="timeline-tag">ספרינט 1</span>
+          <h3>תשתית וליבת המערכת</h3>
+          <p>סביבת VR בסיסית, אווטארים מסונכרנים, תקשורת מרובת-משתתפים, בסיס תמלול והגדרת ה-MVP.</p>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot">2</div>
+        <div class="timeline-card">
+          <span class="timeline-tag">ספרינט 2</span>
+          <h3>תיעוד, שיתוף וניווט</h3>
+          <p>הקלטת ישיבות, לוח לבן שיתופי, כלים אינטראקטיביים, סימולציית סינון מים ותפריטים.</p>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot">3</div>
+        <div class="timeline-card">
+          <span class="timeline-tag">ספרינט 3</span>
+          <h3>פיצ'רים מתקדמים</h3>
+          <p>מציאות רבודה (AR), סימולציית מט"ש, חדר מודלים והרכבה, ושפת סימנים. ביקור במט"ש בית שאן.</p>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot">4</div>
+        <div class="timeline-card">
+          <span class="timeline-tag">ספרינט 4 - סיום</span>
+          <h3>הגשה וסיכום</h3>
+          <p>פולישינג, בדיקות מקיפות, שפת סימנים, Whiteboard שיתופי, הצגה בפני שופטים.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- POSTER -->
+<div class="poster-section">
+  <div class="poster-inner">
+    <div class="sec-title fade-in">
+      <h2>פוסטר הפרויקט</h2>
+      <div class="line"></div>
+      <p>סקירה ויזואלית מלאה של WaterVision VR - מודולים, ארכיטקטורה, תוצאות וצוות</p>
+    </div>
+    <div class="poster-frame fade-in">
+      <a href="assets/poster.jpg" target="_blank" rel="noopener" class="poster-link">
+        <span class="poster-zoom-hint">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+          לחצו להגדלה
+        </span>
+        <img src="assets/poster.jpg" alt="פוסטר WaterVision VR" loading="lazy" />
+      </a>
+      <div class="poster-actions">
+        <a href="assets/poster.jpg" target="_blank" rel="noopener" class="btn btn-outline">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+          הגדלת התמונה
+        </a>
+        <a href="assets/WaterVision-VR-Poster.pdf" target="_blank" rel="noopener" class="btn btn-primary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg>
+          הורדת הפוסטר (PDF)
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- QUICK NAV -->
+<div class="quicknav-section fade-in">
+  <div class="quicknav-inner">
+    <div class="sec-title">
+      <h2>גלה עוד</h2>
+      <div class="line"></div>
+    </div>
+    <div class="quicknav-grid">
+      <a href="sprints.html" class="qn-card">
+        <div class="qn-banner qn-b1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="3" width="8" height="4" rx="1"/><path d="M8 5H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/></svg></div>
+        <div class="qn-body">
+          <h3>ספרינטים ומסמכים</h3>
+          <p>סרטונים, מסמכים ותיעוד מארבעת הספרינטים.</p>
+          <span class="qn-link">לספרינטים &larr;</span>
+        </div>
+      </a>
+      <a href="gallery.html" class="qn-card">
+        <div class="qn-banner qn-b2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg></div>
+        <div class="qn-body">
+          <h3>גלריה</h3>
+          <p>21 צילומי מסך מה-VR ותמונות מאירועי הפרויקט.</p>
+          <span class="qn-link">לגלריה &larr;</span>
+        </div>
+      </a>
+      <a href="team.html" class="qn-card">
+        <div class="qn-banner qn-b3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M16 5.5a3 3 0 0 1 0 5.5M21 20a6 6 0 0 0-4-5.6"/></svg></div>
+        <div class="qn-body">
+          <h3>הצוות</h3>
+          <p>הכירו את חמשת חברי הצוות שמאחורי המוצר.</p>
+          <span class="qn-link">לצוות &larr;</span>
+        </div>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <img src="assets/logo.png" alt="WaterVision" />
+  <div class="footer-name">WaterVision VR - פרויקט גמר 2026</div>
+  <div class="footer-team">סיון לסרי &middot; אלינור סרור &middot; נתנאל שן &middot; עומר פלג &middot; שלו תורג'מן</div>
+</footer>
+
+<script>
+const fadeObs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('visible'); fadeObs.unobserve(e.target); } });
+}, { threshold: 0.08 });
+document.querySelectorAll('.fade-in').forEach(el => fadeObs.observe(el));
+
+function animateCounter(el, target, duration) {
+  const start = performance.now();
+  const run = now => {
+    const p = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.round(eased * target);
+    if (p < 1) requestAnimationFrame(run);
+    else el.textContent = target;
+  };
+  requestAnimationFrame(run);
+}
+const counterObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    e.target.querySelectorAll('[data-target]').forEach(el => {
+      animateCounter(el, parseInt(el.dataset.target), 1800);
+    });
+    counterObs.unobserve(e.target);
+  });
+}, { threshold: 0.3 });
+const sg = document.querySelector('.stats-grid');
+if (sg) counterObs.observe(sg);
+</script>
+<script src="js/nav.js" defer></script>
+<script src="js/effects.js" defer></script>
+<script src="js/a11y.js" defer></script>
+</body>
+</html>
